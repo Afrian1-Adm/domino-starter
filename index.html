@@ -151,6 +151,11 @@
         </label>
       </div>
 
+<div class="mb-4">
+  <button id="export-clasif" class="px-3 py-1 rounded bg-emerald-600 text-white text-sm hover:bg-emerald-700">⬇ Exportar Clasificatoria (CSV)</button>
+</div>
+
+
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm" id="tabla-clasif">
           <thead class="bg-slate-50 text-slate-700">
@@ -178,6 +183,10 @@
         <div class="flex items-center gap-2">
           <button id="back-to-main" class="inline-flex items-center gap-2 rounded-xl bg-slate-600 text-white px-3 py-2 text-sm font-semibold shadow hover:bg-slate-700">
             ← Volver
+<button id="export-historial" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 text-white px-3 py-2 text-sm font-semibold shadow hover:bg-emerald-700">
+  ⬇ Exportar Historial (CSV)
+</button>
+
           </button>
         </div>
       </div>
@@ -185,6 +194,8 @@
         <table class="min-w-full text-sm">
           <thead class="bg-slate-50 text-slate-700">
             <tr>
+              <th class="px-4 py-3 text-left font-semibold">Racha Max</th>
+                                   <th class="px-4 py-3 text-left font-semibold">Racha Actual</th>
               <th class="px-4 py-3 text-left font-semibold">Fecha</th>
               <th class="px-4 py-3 text-left font-semibold">Mesa</th>
               <th class="px-4 py-3 text-left font-semibold">Objetivo</th>
