@@ -140,16 +140,32 @@
         </button>
       </div>
 
-      <div id="top-controls" class="flex items-center gap-2 mb-4">
-        <span class="text-sm font-semibold">Ordenar por:</span>
-        <button class="px-3 py-1 rounded bg-slate-100 text-slate-700 text-sm" data-top="eficiencia">Eficiencia</button>
-        <button class="px-3 py-1 rounded bg-slate-100 text-slate-700 text-sm" data-top="victorias">Victorias</button>
-        <button class="px-3 py-1 rounded bg-slate-100 text-slate-700 text-sm" data-top="jg">Jugadas Ganadas</button>
-        <button class="px-3 py-1 rounded bg-slate-100 text-slate-700 text-sm" data-top="jp">Jugadas Perdidas</button>
-        <label class="ml-4 flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" id="filtro-30" class="rounded border-slate-300"> ≥ 30 partidas
-        </label>
-      </div>
+    <div id="clasif-filtros" class="flex flex-wrap items-center gap-3 mb-4">
+  <div class="flex items-center gap-2">
+    <label class="text-sm text-slate-600">Desde</label>
+    <input type="date" id="f_desde" class="rounded-lg border border-slate-300 px-2 py-1 text-sm">
+  </div>
+  <div class="flex items-center gap-2">
+    <label class="text-sm text-slate-600">Hasta</label>
+    <input type="date" id="f_hasta" class="rounded-lg border border-slate-300 px-2 py-1 text-sm">
+  </div>
+  <div class="flex items-center gap-2">
+    <label class="text-sm text-slate-600">Período rápido</label>
+    <select id="f_periodo" class="rounded-lg border border-slate-300 px-2 py-1 text-sm">
+      <option value="personalizado">Personalizado</option>
+      <option value="7d">Últimos 7 días</option>
+      <option value="14d">Últimos 14 días</option>
+      <option value="30d">Últimos 30 días</option>
+      <option value="todo">Todas las partidas</option>
+    </select>
+  </div>
+  <label class="ml-2 flex items-center gap-2 text-sm text-slate-700">
+    <input type="checkbox" id="filtro-30" class="rounded border-slate-300"> ≥ 30 partidas
+  </label>
+  <button id="f_limpiar" class="ml-2 px-3 py-1 rounded bg-slate-100 text-slate-700 text-sm hover:bg-slate-200">
+    Limpiar filtros
+  </button>
+</div>
 
 <div class="mb-4">
   <button id="export-clasif" class="px-3 py-1 rounded bg-emerald-600 text-white text-sm hover:bg-emerald-700">⬇ Exportar Clasificatoria (CSV)</button>
@@ -195,7 +211,7 @@
           <thead class="bg-slate-50 text-slate-700">
             <tr>
               <th class="px-4 py-3 text-left font-semibold">Racha Max</th>
-                                   <th class="px-4 py-3 text-left font-semibold">Racha Actual</th>
+              <th class="px-4 py-3 text-left font-semibold">Racha Actual</th>
               <th class="px-4 py-3 text-left font-semibold">Fecha</th>
               <th class="px-4 py-3 text-left font-semibold">Mesa</th>
               <th class="px-4 py-3 text-left font-semibold">Objetivo</th>

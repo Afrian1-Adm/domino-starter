@@ -20,6 +20,20 @@
   };
 
   // UI refs
+    // Filtros de Clasificatoria
+  const fDesde = document.getElementById('f_desde');
+  const fHasta = document.getElementById('f_hasta');
+  const fPeriodo = document.getElementById('f_periodo');
+  const fLimpiar = document.getElementById('f_limpiar');
+
+  // Estado de filtros (solo en memoria)
+  const filtros = {
+    desde: '',   // 'YYYY-MM-DD'
+    hasta: '',   // 'YYYY-MM-DD'
+    periodo: 'personalizado', // '7d' | '14d' | '30d' | 'todo'
+    minPartidas: false        // ≥30
+  };
+ 
   const fecha = $('#fecha');
   const mesa = $('#mesa');
   const target = $('#target');
@@ -77,7 +91,65 @@
   }
 
   // Init
-  function init() {
+  function init()   // --- Listeners de filtros ---
+  fPeriodo?.addEventListener('change', () => {
+    filtros.periodo = fPeriodo.value;
+    aplicarPeriodoRapido();
+    renderClasificatoria(); // auto-orden por eficiencia
+  });
+
+  fDesde?.addEventListener('change', () => {
+    filtros.desde = fDesde.value;
+    filtros.periodo = 'personalizado';
+    fPeriodo.value = 'personalizado';
+    renderClasificatoria();
+  });
+
+  fHasta?.addEventListener('change', () => {
+    filtros.hasta = fHasta.value;
+    filtros.periodo = 'personalizado';
+    fPeriodo.value = 'personalizado';
+    renderClasificatoria();
+  });
+
+  document.getElementById('filtro-30')?.addEventListener('change', (e) => {
+    filtros.minPartidas = e.target.checked;
+    renderClasificatoria();
+  });
+
+  fLimpiar?.addEventListener('click', () => {
+    filtros.desde = '';
+    filtros.hasta = '';
+    filtros.periodo = 'personalizado';
+    filtros.minPartidas = false;
+    if (fDesde) fDesde.value = '';
+    if (fHasta) fHasta.value = '';
+    if (fPeriodo) fPeriodo.value = 'personalizado';
+    const chk30 = document.getElementById('filtro-30');
+    if (chk30) chk30.checked = false;
+    renderClasificatoria();
+  });
+
+  function aplicarPeriodoRapido() {
+    if (filtros.periodo === 'todo') {
+      filtros.desde = '';
+      filtros.hasta = '';
+      if (fDesde) fDesde.value = '';
+      if (fHasta) fHasta.value = '';
+      return;
+    }
+    if (!['7d','14d','30d'].includes(filtros.periodo)) return;
+    const hoy = new Date();
+    const d = new Date(hoy);
+    const days = filtros.periodo === '7d' ? 7 : (filtros.periodo === '14d' ? 14 : 30);
+    d.setDate(hoy.getDate() - days);
+    const toYMD = (x)=> x.toISOString().slice(0,10);
+    filtros.desde = toYMD(d);
+    filtros.hasta = toYMD(hoy);
+    if (fDesde) fDesde.value = filtros.desde;
+    if (fHasta) fHasta.value = filtros.hasta;
+  }
+{
     targetDisplay.textContent = target.value;
     renderRoundList();
     renderTotals();
@@ -294,13 +366,26 @@
   function refreshWinner() { renderTotals(); }
 
   // Clasificatoria + Rachas
-  function computeClasificatoria() {
-    const matches = loadMatches();
-    // Ordena por fecha para calcular rachas en orden cronológico (si no hay fecha, usa orden de carga)
-    const ms = matches.slice().sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
+    function computeClasificatoria() {
+    // 1) cargar y filtrar por fecha
+    const all = loadMatches();
+    const filtered = all.filter(m => {
+      // fechas como 'YYYY-MM-DD' (si no hay fecha, lo dejamos pasar en 'todo' o personalizado vacío)
+      const f = (m.fecha || '').trim();
+      // rango activo?
+      let passDate = true;
+      if (filtros.periodo !== 'todo') {
+        if (filtros.desde && f && f < filtros.desde) passDate = false;
+        if (filtros.hasta && f && f > filtros.hasta) passDate = false;
+      }
+      return passDate;
+    });
 
-    // Stats por jugador
-    const stats = new Map(); // name -> {v,d,t,jg,jp, rachaActual, rachaMax}
+    // 2) ordenar cronológicamente para rachas
+    const ms = filtered.slice().sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
+
+    // 3) acumular estadísticas + rachas por ronda
+    const stats = new Map(); // name -> { v,d,t,jg,jp, rachaActual, rachaMax }
     const inc = (name, key, by=1) => {
       if (!name) return;
       if (!stats.has(name)) stats.set(name, { v:0,d:0,t:0,jg:0,jp:0, rachaActual:0, rachaMax:0 });
@@ -323,10 +408,9 @@
       if (aWins) { A.forEach(n => inc(n, 'v')); B.forEach(n => inc(n, 'd')); }
       else if (bWins) { B.forEach(n => inc(n, 'v')); A.forEach(n => inc(n, 'd')); }
 
-      // Rondas → jg/jp + rachas
       for (const r of (m.rondas || [])) {
         const pa = r.puntosA || 0, pb = r.puntosB || 0;
-        if (pa === pb) continue; // ronda empatada
+        if (pa === pb) continue;
         const ganadorR = pa > pb ? 'A' : 'B';
         if (ganadorR === 'A') {
           A.forEach(n => { inc(n, 'jg'); const s = touch(n); s.rachaActual++; s.rachaMax = Math.max(s.rachaMax, s.rachaActual); });
@@ -338,26 +422,24 @@
       }
     }
 
-    const rows = [];
+    // 4) construir filas
+    let rows = [];
     for (const [name, s] of stats.entries()) {
       const eff = (s.v + s.d) > 0 ? (s.v / (s.v + s.d)) * 100 : 0;
-      rows.push({
-        jugador: name,
-        victorias: s.v, derrotas: s.d, total: s.t,
-        eficiencia: eff, jg: s.jg, jp: s.jp,
-        rachaMax: s.rachaMax, rachaActual: s.rachaActual
-      });
+      rows.push({ jugador: name, victorias: s.v, derrotas: s.d, total: s.t, eficiencia: eff, jg: s.jg, jp: s.jp, rachaMax: s.rachaMax, rachaActual: s.rachaActual });
     }
+
+    // 5) filtro ≥ 30 partidas, si aplica
+    if (filtros.minPartidas) rows = rows.filter(r => r.total >= 30);
+
+    // 6) orden automático por eficiencia desc
+    rows.sort((a,b) => b.eficiencia - a.eficiencia);
+
     return rows;
   }
 
-  function renderClasificatoria(sortBy='eficiencia', only30=false) {
-    const rows = computeClasificatoria();
-    let list = rows.slice();
-    if (only30) list = list.filter(r => r.total >= 30);
-
-    list.sort((a,b) => sortBy === 'eficiencia' ? b.eficiencia - a.eficiencia : (b[sortBy]||0) - (a[sortBy]||0));
-
+    function renderClasificatoria() {
+    const list = computeClasificatoria();
     clasifBody.innerHTML = '';
     for (const r of list) {
       const tr = document.createElement('tr');
@@ -368,14 +450,15 @@
         <td class="px-4 py-3">${r.derrotas}</td>
         <td class="px-4 py-3">${r.total}</td>
         <td class="px-4 py-3">${r.eficiencia.toFixed(1)}%</td>
-        <td class="px-4 py-3">${r.jg}</td>
-        <td class="px-4 py-3">${r.jp}</td>
-        <td class="px-4 py-3">${r.rachaMax}</td>
-        <td class="px-4 py-3">${r.rachaActual}</td>
+        <td class="px-4 py-3">${r.jg ?? 0}</td>
+        <td class="px-4 py-3">${r.jp ?? 0}</td>
+        <td class="px-4 py-3">${r.rachaMax ?? 0}</td>
+        <td class="px-4 py-3">${r.rachaActual ?? 0}</td>
       `;
       clasifBody.appendChild(tr);
     }
   }
+
 
   // Historial + borrar fila
   function renderHistorial() {
