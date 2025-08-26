@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Domino Starter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .badge{display:inline-flex;align-items:center;gap:.25rem;padding:.125rem .5rem;border-radius:9999px;font-size:.75rem;font-weight:600}
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 text-slate-800 font-sans">
+  <header class="sticky top-0 z-10 backdrop-blur-sm bg-white/70 border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
+      <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+        <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Liga Dominó – Starter</span>
+      </h1>
+      <div class="flex items-center gap-2 text-sm">
+        <button id="reset-all" class="rounded-xl bg-slate-100 text-slate-700 px-3 py-1 hover:bg-slate-200">🧹 Limpiar Todo</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 md:px-6 py-6 space-y-8">
+
+    <!-- Detalle de Partida -->
+    <section class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200 p-6" aria-labelledby="detalle-title" id="detalle-section">
+      <div class="flex items-center justify-between mb-4">
+        <h2 id="detalle-title" class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <span class="text-indigo-500">🎲</span> Detalle de Partida
+        </h2>
+        <div class="flex items-center gap-2 text-sm">
+          <span id="match-status" class="badge bg-yellow-100 text-yellow-700">En curso</span>
+        </div>
+      </div>
+
+      <form class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="fecha" class="block text-sm font-semibold text-slate-700 mb-1">Fecha</label>
+            <input type="date" id="fecha" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label for="mesa" class="block text-sm font-semibold text-slate-700 mb-1">Mesa</label>
+            <input type="number" id="mesa" min="1" step="1" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label for="target" class="block text-sm font-semibold text-slate-700 mb-1">Modalidad (puntos objetivo)</label>
+            <select id="target" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="100">100</option>
+              <option value="150">150</option>
+              <option value="200">200</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-bold text-slate-800 mb-3">Equipos</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="rounded-xl border border-slate-200 p-4" id="cardA">
+              <fieldset>
+                <legend class="text-sm font-semibold text-slate-700">Equipo A</legend>
+                <label class="block text-sm text-slate-600 mt-3">Jugador 1</label>
+                <input id="equipoA-jugador1" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-sm text-slate-600 mt-3">Jugador 2</label>
+                <input id="equipoA-jugador2" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </fieldset>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4" id="cardB">
+              <fieldset>
+                <legend class="text-sm font-semibold text-slate-700">Equipo B</legend>
+                <label class="block text-sm text-slate-600 mt-3">Jugador 1</label>
+                <input id="equipoB-jugador1" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-sm text-slate-600 mt-3">Jugador 2</label>
+                <input id="equipoB-jugador2" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </fieldset>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-lg font-bold text-slate-800">Rondas</h3>
+            <div class="flex items-center gap-2">
+              <button id="add-round" type="button" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 text-white px-3 py-2 text-sm font-semibold shadow hover:bg-blue-700">+ Agregar ronda</button>
+              <button id="finalize-match" type="button" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 text-white px-3 py-2 text-sm font-semibold shadow hover:bg-emerald-700" disabled>Finalizar partida</button>
+              <button id="new-match" type="button" class="inline-flex items-center gap-2 rounded-xl bg-slate-100 text-slate-700 px-3 py-2 text-sm font-semibold hover:bg-slate-200">Nueva partida</button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 overflow-hidden">
+            <div class="grid grid-cols-12 bg-slate-50 text-sm font-semibold text-slate-600">
+              <div class="col-span-2 px-4 py-3">Ronda</div>
+              <div class="col-span-3 px-4 py-3">Equipo A (+puntos)</div>
+              <div class="col-span-3 px-4 py-3">Equipo B (+puntos)</div>
+              <div class="col-span-2 px-4 py-3">Anota</div>
+              <div class="col-span-2 px-4 py-3">Acción</div>
+            </div>
+            <div id="rounds-list" class="divide-y divide-slate-200"></div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="text-sm text-slate-600">Total Equipo A</div>
+              <div id="total-a" class="text-3xl font-extrabold mt-1">0</div>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="text-sm text-slate-600">Objetivo</div>
+              <div class="flex items-center gap-2 mt-1">
+                <div id="target-display" class="text-2xl font-extrabold">100</div>
+                <span id="progress-badge" class="badge bg-blue-100 text-blue-700">En curso</span>
+              </div>
+              <div class="mt-3">
+                <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div id="progress-bar" class="h-2 bg-gradient-to-r from-blue-500 to-emerald-500" style="width:0%"></div>
+                </div>
+              </div>
+              <div class="mt-3 space-y-1">
+                <div class="text-sm text-slate-600">Ganador: <span id="winner-text" class="font-semibold">-</span></div>
+                <div class="text-sm text-slate-600">Lisa: <span id="lisa-text" class="font-semibold">-</span></div>
+              </div>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="text-sm text-slate-600">Total Equipo B</div>
+              <div id="total-b" class="text-3xl font-extrabold mt-1">0</div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Clasificatoria -->
+    <section class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200 p-6" aria-labelledby="clasificatoria-title">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <h2 id="clasificatoria-title" class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <span class="text-yellow-500">🏆</span> Clasificatoria
+        </h2>
+        <button id="show-history" class="inline-flex items-center gap-2 rounded-xl bg-slate-600 text-white px-4 py-2 text-sm font-semibold shadow hover:bg-slate-700">
+          <span>📊</span> Ver Historial
+        </button>
+      </div>
+
+      <div id="top-controls" class="flex items-center gap-2 mb-4">
+        <span class="text-sm font-semibold">Ordenar por:</span>
+        <button class="px-3 py-1 rounded bg-slate-100 text-slate-700 text-sm" data-top="eficiencia">Eficiencia</button>
+        <button class="px-3 py-1 rounded bg-slate-100 text-slate-700 text-sm" data-top="victorias">Victorias</button>
+        <button class="px-3 py-1 rounded bg-slate-100 text-slate-700 text-sm" data-top="jg">Jugadas Ganadas</button>
+        <button class="px-3 py-1 rounded bg-slate-100 text-slate-700 text-sm" data-top="jp">Jugadas Perdidas</button>
+        <label class="ml-4 flex items-center gap-2 text-sm text-slate-700">
+          <input type="checkbox" id="filtro-30" class="rounded border-slate-300"> ≥ 30 partidas
+        </label>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm" id="tabla-clasif">
+          <thead class="bg-slate-50 text-slate-700">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold">Jugador</th>
+              <th class="px-4 py-3 text-left font-semibold">Victorias</th>
+              <th class="px-4 py-3 text-left font-semibold">Derrotas</th>
+              <th class="px-4 py-3 text-left font-semibold">Total</th>
+              <th class="px-4 py-3 text-left font-semibold">Eficiencia %</th>
+              <th class="px-4 py-3 text-left font-semibold">Jugadas Ganadas</th>
+              <th class="px-4 py-3 text-left font-semibold">Jugadas Perdidas</th>
+            </tr>
+          </thead>
+          <tbody id="clasificacion-body" class="divide-y divide-slate-200"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Historial -->
+    <section class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200 p-6 hidden" id="historial-section">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <h2 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <span class="text-slate-500">📊</span> Historial de Partidas
+        </h2>
+        <div class="flex items-center gap-2">
+          <button id="back-to-main" class="inline-flex items-center gap-2 rounded-xl bg-slate-600 text-white px-3 py-2 text-sm font-semibold shadow hover:bg-slate-700">
+            ← Volver
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50 text-slate-700">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold">Fecha</th>
+              <th class="px-4 py-3 text-left font-semibold">Mesa</th>
+              <th class="px-4 py-3 text-left font-semibold">Objetivo</th>
+              <th class="px-4 py-3 text-left font-semibold">Equipo A</th>
+              <th class="px-4 py-3 text-left font-semibold">Puntos A</th>
+              <th class="px-4 py-3 text-left font-semibold">Equipo B</th>
+              <th class="px-4 py-3 text-left font-semibold">Puntos B</th>
+              <th class="px-4 py-3 text-left font-semibold">Ganador</th>
+              <th class="px-4 py-3 text-left font-semibold">Lisa</th>
+              <th class="px-4 py-3 text-left font-semibold">Rondas</th>
+            </tr>
+          </thead>
+          <tbody id="historial-body" class="divide-y divide-slate-200"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
